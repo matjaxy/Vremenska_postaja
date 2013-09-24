@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="refresh" content="60" />
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+	<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	
+	
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable(${listTEMP});
+
+        var options = {
+          title: 'Graf Rezultatov'
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('Tab1'));
+        chart.draw(data, options);
+      }
+    </script>
+	
+	<script>
+	//button visual import
+	$(function() {
+    $( "input[type=submit], a, button" )
+      .button()
+      .click(function( event ) {
+        event.preventDefault();
+      });
+	});
+	
+	//radio visual import
+	$(function() {
+    $( "#radio" ).buttonset();
+	});
+	
+	//date picker
+	$(function() {
+    $( "#from" ).datepicker({
+      defaultDate: "+1w",
+      changeMonth: true,
+      numberOfMonths: 3,
+      onClose: function( selectedDate ) {
+        $( "#to" ).datepicker( "option", "minDate", selectedDate );
+      }
+    });
+    $( "#to" ).datepicker({
+      defaultDate: "+1w",
+      changeMonth: true,
+      numberOfMonths: 3,
+      onClose: function( selectedDate ) {
+        $( "#from" ).datepicker( "option", "maxDate", selectedDate );
+      }
+    });
+	});
+	
+	//default show
+	$(document).ready(function(){ 
+	$("#Tab2").show();
+
+	//hide/show divs - radio button
+    $("input[name$='group1']").click(function() {
+        var test = $(this).val();
+        $("div.desc").hide();
+        $("#Tab"+test).show();
+    }); 
+	});
+	</script>
+	<style>
+		#senzorji{font-size:150%;}
+		#midtext{text-align:center;}
+		.alnright { text-align: right; font-size:50%; }
+		#radio{font-size:70%;}
+		div.ui-datepicker{font-size:10px;}
+		.desc { display: none; }
+		
+
+	</style>
+    
+</head>
+<body> 
+
+	<table border = "1" align="center" width="90%">
+		<tr width="100%" class='alnright' >
+			<td align="right">
+			<form name="changeColor"> 
+			<input type="submit" name="colr" value="BLUE" onclick="document.bgColor='#A9D0F5'">
+			<input type="submit" name="colr" value="RED" onclick="document.bgColor='#F78181'"> 
+			<input type="submit" name="colr" value="GREEN" onclick="document.bgColor='#A9F5A9'">
+			<input type="submit" name="colr" value="WHITE" onclick="document.bgColor='#FFFFFF'"> 
+			<input type="submit" name="colr" value="BLACK" onclick="document.bgColor='#000000'"> 
+			</form>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<table border="1" align="center">
+					
+					<tr>
+						<td><div id="senzorji">
+							T: ${sensors["temperature"]} &deg;C
+						</div></td>
+						<td rowspan="3">
+							<img src="./img/Rainy_Weather_clip_art_small.png" alt="Rain" height="94" width="99">
+						</td>
+						
+					</tr>
+					<tr>
+						<td><div id="senzorji">
+							P: ${sensors["pressure"]} mbar
+						</div></td>
+					</tr>
+					
+					<tr>
+						<td><div id="senzorji">
+							M: ${sensors["moisture"]} mm
+						</div></td>
+					</tr>
+					
+					</div>
+					
+					<tr>
+						<td colspan="4"></td>
+					</tr>
+					
+					<tr>
+						<td colspan="4"><div id="midtext">
+							Time: ${time} Date: ${date}
+						</div></td>
+							
+					</tr>
+					<tr>
+						<td colspan="4"><div id="midtext">
+							GPS: <b>X: ${gps_x} Y: ${gps_y} H: ${sensors["height"]}</b>
+						</div></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<br />
+			</td>
+		</tr>
+		
+		<tr>
+			<td>	
+				<table align="center" border="1" cellpadding="10">
+					<tr>
+						<td colspan ="2" align = "center">
+							<form>
+							  <div id="radio">
+								<input type="radio" id="radio1" name="group1" value="1" /><label for="radio1">Graf</label>
+								<input type="radio" id="radio2" name="group1" value="2" checked="checked" /><label for="radio2">Zemljevid</label>
+								<input type="radio" id="radio3" name="group1" value="3" /><label for="radio3">Statistika</label>
+							  </div>
+							</form>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div id="Tab2" class="desc">
+							<iframe width="425" height="350" frameborder="0" scrolling="yes" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=sl&amp;geocode=&amp;q=Ljubljana&amp;aq=&amp;sll=37.0625,-95.677068&amp;sspn=56.637293,114.169922&amp;ie=UTF8&amp;hq=&amp;hnear=Ljubljana,+Slovenija&amp;t=m&amp;z=12&amp;iwloc=A&amp;ll=46.056451,14.50807&amp;output=embed"></iframe><br /><small><a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=sl&amp;geocode=&amp;q=Ljubljana&amp;aq=&amp;sll=37.0625,-95.677068&amp;sspn=56.637293,114.169922&amp;ie=UTF8&amp;hq=&amp;hnear=Ljubljana,+Slovenija&amp;t=m&amp;z=12&amp;iwloc=A&amp;ll=${gps_x},${gps_y}" style="color:#0000FF;text-align:left">Bigger map</a></small></div>
+							
+							<div id="Tab1" class="desc" style="width: 100%; height: 100%;">
+								<label for="from">From</label>
+								<input type="text" id="from" name="from" />
+								<label for="to">to</label>
+								<input type="text" id="to" name="to" /></div>
+							
+							<div id="Tab3" class="desc" >123 Date</div>
+							
+						</td>
+					</tr>
+				
+				</table>
+			</td>
+		</tr>
+		
+	</table>
+	
+
+
+	
+
+</body>
+
+</html>

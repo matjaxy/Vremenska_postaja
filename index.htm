@@ -1,0 +1,442 @@
+## -*- coding: utf-8 -*-
+<!DOCTYPE html>
+<!-- saved from url=(0057)http://getbootstrap.com/2.3.2/examples/justified-nav.html -->
+<!--<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">-->
+<html>
+    <meta charset="utf-8">
+    <title>Vremenska postaja</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+		<meta http-equiv="refresh" content="60" />
+	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+	<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script src="http://code.highcharts.com/highcharts.js"></script>
+	<script src="http://code.highcharts.com/modules/exporting.js"></script>
+
+	
+    <script type="text/javascript">
+		
+	//refresh div every X sec
+	 var refreshId = setInterval(function()
+	{$('#refreshTab').fadeOut("fast").load('response.php').fadeIn("fast");}, 20000);
+
+
+	//graf
+	$(function () {
+		$('#container').highcharts({
+			chart: {
+				type: 'line'
+			},
+			title: {
+				text: 'Graf povprečne temperature zadnjih 24 ur'
+			},
+			subtitle: {
+				text: 'Meritve računane vsako uro'
+			},
+			xAxis: {
+				categories: ${grafcasa}<!--['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']-->
+			},
+			yAxis: {
+				title: {
+					text: 'Temperatura (°C)'
+				}
+			},
+			tooltip: {
+				enabled: false,
+				formatter: function() {
+					return '<b>'+ this.series.name +'</b><br/>'+
+						this.x +': '+ this.y +'°C';
+				}
+			},
+			plotOptions: {
+				line: {
+					dataLabels: {
+						enabled: true
+					},
+					enableMouseTracking: true
+				}
+			},
+			series: [{
+				name: 'Temperatura',
+				data: ${graftemperature}<!--[7.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]-->
+			}]
+		});
+	});
+	
+	//graf2
+	$(function () {
+        $('#container2').highcharts({
+            chart: {
+                zoomType: 'x',
+                spacingRight: 20
+            },
+            title: {
+                text: 'Povprečje meritv vlažnosti v zadnjih 24 urah'
+            },
+            subtitle: {
+                text: document.ontouchstart === undefined ?
+                    'Klikni in povleci za povečavo' :
+                    'Povleci za povečavo'
+            },
+            xAxis: {
+                type: 'datetime',
+                maxZoom: 3600000, // 1 ura povecave
+                title: {
+                    text: null
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Vlaga (%)'
+                }
+            },
+            tooltip: {
+                shared: true
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                area: {
+                    fillColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, Highcharts.getOptions().colors[0]],
+                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                        ]
+                    },
+                    lineWidth: 1,
+                    marker: {
+                        enabled: false
+                    },
+                    shadow: false,
+                    states: {
+                        hover: {
+                            lineWidth: 1
+                        }
+                    },
+                    threshold: null
+                }
+            },
+    
+            series: [{
+                type: 'area',
+                name: 'Vlažnost zraka',
+                pointInterval: 24 * 3600 * 1000,
+                pointStart: Date.UTC(2006, 2, 01),
+                data: ${grafvlage}
+            }]
+        });
+    });
+    
+
+	
+	//default show
+	$(document).ready(function(){ 
+	
+	//menjava puščic////////////////////////////////////////////
+	var a = ${smertemperature}
+	if( a > 0.5)
+		$("#temperaturaslika").attr("src", "img/arrow_up.png");
+	if( a == 0)
+		$("#temperaturaslika").attr("src","img/arrow_right.png");
+	if( a < -0.5)
+		$("#temperaturaslika").attr("src","img/arrow_down.png");
+	
+	var b = ${smerpritiska}
+	if( b > 0.5)
+		$("#pritiskslika").attr("src", "img/arrow_up.png");
+	if( b == 0)
+		$("#pritiskslika").attr("src","img/arrow_right.png");
+	if( b < -0.5)
+		$("#pritiskslika").attr("src","img/arrow_down.png");
+	
+	var c = ${smervlage}
+	if( c > 0.5)
+		$("#vlagaslika").attr("src", "img/arrow_up.png");
+	if( c == 0)
+		$("#vlagaslika").attr("src","img/arrow_right.png");
+	if( c < -0.5)
+		$("#vlagaslika").attr("src","img/arrow_down.png");
+	////////////////////////////////////////////////////////
+	
+	$("#TabTrenutne").show();
+	$("#Trenutne").addClass("active");
+	
+	//console.log('def show');
+	    
+
+
+		$('.gumb').click( function(e) {
+			var test = $(this).text();
+			 e.preventDefault();
+			 if(test.length > 13)
+				test = "Trenutne"
+			//console.log('click '+test);
+			
+						
+			$("li[name$='group']").removeClass();
+			$("#"+test).addClass("active");
+			$("div.desc").hide();
+			$("#Tab"+test).show();
+		});
+	}); 
+	</script>
+	
+    <!-- Le styles -->
+    <link href="http://getbootstrap.com/2.3.2/assets/css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 10px;
+        padding-bottom: 60px;
+      }
+	  .right {
+		float:right;
+		color:#999999;
+		
+	  }
+	.desc { display: none; }
+
+      /* Custom container */
+      .container {
+        margin: 0 auto;
+        max-width: 1000px;
+      }
+      .container > hr {
+        margin: 60px 0;
+      }
+
+      /* Main marketing message and sign up button */
+      .jumbotron {
+        margin: 40px 0;
+        text-align: center;
+      }
+      .jumbotron h1 {
+        font-size: 100px;
+        line-height: 1;
+      }
+      .jumbotron .lead {
+        font-size: 24px;
+        line-height: 1.25;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 2px 2px;
+      }
+	   .hh1 h1 {
+        font-size: 70px;
+        line-height: 1;
+      }
+
+      /* Supporting marketing content */
+      .marketing {
+        margin: 10px 0;
+      }
+      .marketing p + h4 {
+        margin-top: 28px;
+      }
+
+
+      /* Customize the navbar links to be fill the entire space of the .navbar */
+      .navbar .navbar-inner {
+        padding: 0;
+      }
+      .navbar .nav {
+        margin: 0;
+        display: table;
+        width: 100%;
+      }
+      .navbar .nav li {
+        display: table-cell;
+        width: 1%;
+        float: none;
+      }
+      .navbar .nav li a {
+        font-weight: bold;
+        text-align: center;
+        border-left: 1px solid rgba(255,255,255,.75);
+        border-right: 1px solid rgba(0,0,0,.1);
+      }
+      .navbar .nav li:first-child a {
+        border-left: 0;
+        border-radius: 3px 0 0 3px;
+      }
+      .navbar .nav li:last-child a {
+        border-right: 0;
+        border-radius: 0 3px 3px 0;
+      }
+    </style>
+    <link href="http://getbootstrap.com/2.3.2/assets/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../assets/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://getbootstrap.com/2.3.2/assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="http://getbootstrap.com/2.3.2/assets/ico/apple-touch-icon-114-precomposed.png">
+      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="http://getbootstrap.com/2.3.2/assets/ico/apple-touch-icon-72-precomposed.png">
+                    <link rel="apple-touch-icon-precomposed" href="http://getbootstrap.com/2.3.2/assets/ico/apple-touch-icon-57-precomposed.png">
+                                   <link rel="shortcut icon" href="http://getbootstrap.com/2.3.2/assets/ico/favicon.png">
+  <style type="text/css"></style></head>
+
+  <body>
+
+    <div class="container">
+
+      <div class="masthead">
+		<table border = "0" width="100%">
+			<tr><td><h3 class="muted">Vremenska postaja</h3></td>
+			<td><h3 class="right">Datum: ${date}, ura: ${time}<h3></td></tr>
+		</table>
+        <div class="navbar">
+          <div class="navbar-inner">
+            <div class="container">
+              <ul class="nav">
+                <li id="Zgodovina" name="group"><a href="#" class="gumb" name="group1" value="1" _pageexpand_="10">Zgodovina</a></li>
+                <li id ="Trenutne" name="group"><a href="#" id="meritveGumb" class="gumb" name="group1" value="2" _pageexpand_="12">Trenutne meritve</a></li>
+                <li id="Statistike" name="group"><a href="#" class="gumb" name="group1" value="3" _pageexpand_="14">Statistike</a></li>
+              </ul>
+            </div>
+          </div>
+        </div><!-- /.navbar -->
+      </div>
+
+	  <!-- SREDINA  -------------------------------------------------------- -->
+      <!-- Jumbotron -->
+      <div class="jumbotron" style='display: block; height: 350px'>
+		<!-- TRENUTNE MERITVE -->
+		<div id="TabTrenutne" class="desc">
+			<iframe width="425" height="350" frameborder="0" scrolling="yes" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=sl&amp;geocode=&amp;q=Ljubljana&amp;aq=&amp;sll=37.0625,-95.677068&amp;sspn=56.637293,114.169922&amp;ie=UTF8&amp;hq=&amp;hnear=Ljubljana,+Slovenija&amp;t=m&amp;z=12&amp;iwloc=A&amp;ll=46.056451,14.50807&amp;output=embed"></iframe><br /><small><a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=sl&amp;geocode=&amp;q=Ljubljana&amp;aq=&amp;sll=37.0625,-95.677068&amp;sspn=56.637293,114.169922&amp;ie=UTF8&amp;hq=&amp;hnear=Ljubljana,+Slovenija&amp;t=m&amp;z=12&amp;iwloc=A&amp;ll=${gps_x},${gps_y}" style="color:#0000FF;text-align:left">Večji zemljevid</a></small>
+			</div>
+			
+		<!-- ZGODOVINA MERITEV  ( GRAF )-->	
+		<div id="TabZgodovina" class="desc" style="width: 100%; height: 100%;">
+			
+			<div id="container" style="min-width: 80%; height: 400px; margin: 0 auto; display: none;"></div>
+			<div id="container2" style="min-width: 80%; height: 400px; margin: 0 auto;"></div>
+		
+		</div>
+			
+			
+		
+		<div id="TabStatistike" class="desc" >
+		<table class="table table-striped">  
+        <thead>  
+          <tr>  
+            <th>Senzor</th>  
+            <th>Minimalna vrednost</th>  
+            <th>Maksimalna vrednost</th>  
+            <th>Povprečje</th>  
+          </tr>  
+        </thead>  
+        <tbody>  
+          <tr>  
+            <td>Temperatura</td>  
+            <td>${temperatureMin} °C </td>
+            <td>${temperatureMax} °C</td>  
+		    <td>${temperatureAverage} °C</td>  
+          </tr>  
+          <tr>  
+            <td>Pritisk</td>  
+            <td>${pressureMin} mbar</td>  
+            <td>${pressureMax} mbar</td>  
+            <td>${pressureAverage} mbar</td>  
+          </tr>  
+          <tr>  
+            <td>Vlaga</td>  
+            <td>${moistureMin}%</td>  
+            <td>${moistureMax}%</td>  
+            <td>${moistureAverage}%</td>  
+          </tr> 
+			<tr>
+				<td colspan="4"></td>
+			</tr>
+			<tr>
+				<td>Število meritev: </td>
+				<td>${id}</td>
+				<td>Uptime: </td>
+				<td>${uptime}</td>
+			</tr>
+			
+        </tbody>  
+      </table>  
+		</div>
+      </div>
+	  
+	  <!-- SREDINA  -------------------------------------------------------- -->
+
+      <hr>
+
+      <!-- Example row of columns -->
+      <div id="refreshTab" class="row-fluid" style = "margin-left: 90px;">
+        <div class="span4">
+			<div class="hh1">
+			  <h2>Temperatura</h2>
+			  <table border="0">
+				<tr>
+				<td style="vertical-align: bottom; position: relative;"><h1>${sensors["temperature"]}</h1></td>
+				<td style="vertical-align: bottom; position: relative;"><h2> °C</h2></td>
+				<td><img id="temperaturaslika" src="img/arrow_down.png" height="90" width="90"></td>
+				</tr>
+			  </table>
+			</div>
+        </div>
+        <div class="span4">
+          <div class="hh1">
+			  <h2>Pritisk</h2>
+			  <table border="0">
+				<tr>
+				<td style="vertical-align: bottom; position: relative;"><h1>${sensors["pressure"]}</h1></td>
+				<td style="vertical-align: bottom; position: relative;"><h2>mbar</h2></td>
+				<td><img id="pritiskslika" src="img/arrow_right.png" height="90" width="90"></td>
+				</tr>
+			  </table>
+			</div>
+       </div>
+        <div class="span4">
+          <div class="hh1">
+			  <h2>Vlaga</h2>
+			  <table border="0">
+				<tr>
+				<td style="vertical-align: bottom; position: relative;"><h1>${sensors["moisture"]}</h1></td>
+				<td style="vertical-align: bottom; position: relative;"><h2>%</h2></td>
+				<td><img id="vlagaslika" src="img/arrow_up.png" height="90" width="90"></td>
+				</tr>
+			  </table>
+			</div>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="footer">
+        <p>Diplomska naloga: Implementacija vremenske postaje na mikrokrmilniški platformi Raspberry Pi, 2013</p>
+      </div>
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="./Template · Bootstrap_files/jquery.js"></script>
+    <script src="./Template · Bootstrap_files/bootstrap-transition.js"></script>
+    <script src="./Template · Bootstrap_files/bootstrap-alert.js"></script>
+    <script src="./Template · Bootstrap_files/bootstrap-modal.js"></script>
+    <script src="./Template · Bootstrap_files/bootstrap-dropdown.js"></script>
+    <script src="./Template · Bootstrap_files/bootstrap-scrollspy.js"></script>
+    <script src="./Template · Bootstrap_files/bootstrap-tab.js"></script>
+    <script src="./Template · Bootstrap_files/bootstrap-tooltip.js"></script>
+    <script src="./Template · Bootstrap_files/bootstrap-popover.js"></script>
+    <script src="./Template · Bootstrap_files/bootstrap-button.js"></script>
+    <script src="./Template · Bootstrap_files/bootstrap-collapse.js"></script>
+    <script src="./Template · Bootstrap_files/bootstrap-carousel.js"></script>
+    <script src="./Template · Bootstrap_files/bootstrap-typeahead.js"></script>
+
+  
+
+</body></html>
