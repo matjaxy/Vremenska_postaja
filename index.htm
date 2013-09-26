@@ -2,31 +2,54 @@
 <!DOCTYPE html>
 <!-- saved from url=(0057)http://getbootstrap.com/2.3.2/examples/justified-nav.html -->
 <!--<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">-->
-<html>
-    <meta charset="utf-8">
+<html leng="en">
+    <meta charset="UTF-8">
     <title>Vremenska postaja</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-		<meta http-equiv="refresh" content="60" />
+	<!--<meta http-equiv="refresh" content="60" /> -->
+	
+	<link href="css/bootstrap.css" rel="stylesheet">
+	<link href="http://getbootstrap.com/2.3.2/assets/css/bootstrap.css" rel="stylesheet">
+	
 	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 	<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
-	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+
 	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 	<script src="http://code.highcharts.com/highcharts.js"></script>
 	<script src="http://code.highcharts.com/modules/exporting.js"></script>
+	<script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+
+	<script src="js/bootstrap.js"></script>
 
 	
     <script type="text/javascript">
-		
+
+	function initialize() {
+        var map_canvas = document.getElementById('map_canvas');
+        var map_options = {
+          center: new google.maps.LatLng(${gps_x}, ${gps_y}),
+          zoom: 14,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+        var map = new google.maps.Map(map_canvas, map_options);
+		var marker = new google.maps.Marker({
+			position: new google.maps.LatLng(${gps_x}, ${gps_y}),
+			map: map,
+			title: 'Hello World!'
+		});
+      }
+	google.maps.event.addDomListener(window, 'load', initialize);
+	
 	//refresh div every X sec
-	 var refreshId = setInterval(function()
-	{$('#refreshTab').fadeOut("fast").load('response.php').fadeIn("fast");}, 20000);
+	var refreshId = setInterval(function()
+	{$('#refreshTab').fadeOut("fast").load('response.php').fadeIn("fast");}, 15000);
 
-
+	
 	//graf
 	$(function () {
-		$('#container').highcharts({
+		$('#container1').highcharts({
 			chart: {
 				type: 'line'
 			},
@@ -64,6 +87,7 @@
 				data: ${graftemperature}<!--[7.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]-->
 			}]
 		});
+
 	});
 	
 	//graf2
@@ -74,7 +98,7 @@
                 spacingRight: 20
             },
             title: {
-                text: 'Povprečje meritv vlažnosti v zadnjih 24 urah'
+                text: 'Povprečje meritev vlažnosti v zadnjih 24 urah'
             },
             subtitle: {
                 text: document.ontouchstart === undefined ?
@@ -125,51 +149,102 @@
             series: [{
                 type: 'area',
                 name: 'Vlažnost zraka',
-                pointInterval: 24 * 3600 * 1000,
-                pointStart: Date.UTC(2006, 2, 01),
+                pointInterval: 3600 * 1000,
+                pointStart: Date.UTC(${grafyear}, ${grafmonth}, ${grafday}),
                 data: ${grafvlage}
             }]
         });
     });
+
+
+	//graf3
+	$(function () {
+        $('#container3').highcharts({
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: 'Graf povpre.nega pritiska v zadnjih 24 urah'
+            },
+            subtitle: {
+                text: 'Meritve ra.unane vsako uro'
+            },
+            xAxis: {
+                categories: ${grafcasa}<!--['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']-->
+            },
+            yAxis: {
+                title: {
+                    text: 'Pritisk (mbar)'
+                }
+            },
+            tooltip: {
+                enabled: false,
+                formatter: function() {
+                    return '<b>'+ this.series.name +'</b><br/>'+
+                        this.x +': '+ this.y +'°C';
+                }
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: true
+                }
+            },
+            series: [{
+                name: 'Pritisk',
+                data: ${grafpritiska}<!--[7.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]-->
+            }]
+        });
+    });
+    
     
 
 	
 	//default show
 	$(document).ready(function(){ 
-	
-	//menjava puščic////////////////////////////////////////////
-	var a = ${smertemperature}
-	if( a > 0.5)
-		$("#temperaturaslika").attr("src", "img/arrow_up.png");
-	if( a == 0)
-		$("#temperaturaslika").attr("src","img/arrow_right.png");
-	if( a < -0.5)
-		$("#temperaturaslika").attr("src","img/arrow_down.png");
-	
-	var b = ${smerpritiska}
-	if( b > 0.5)
-		$("#pritiskslika").attr("src", "img/arrow_up.png");
-	if( b == 0)
-		$("#pritiskslika").attr("src","img/arrow_right.png");
-	if( b < -0.5)
-		$("#pritiskslika").attr("src","img/arrow_down.png");
-	
-	var c = ${smervlage}
-	if( c > 0.5)
-		$("#vlagaslika").attr("src", "img/arrow_up.png");
-	if( c == 0)
-		$("#vlagaslika").attr("src","img/arrow_right.png");
-	if( c < -0.5)
-		$("#vlagaslika").attr("src","img/arrow_down.png");
-	////////////////////////////////////////////////////////
-	
-	$("#TabTrenutne").show();
-	$("#Trenutne").addClass("active");
-	
-	//console.log('def show');
-	    
-
-
+		var izrisgpsa = ${displaygps}
+		if( izrisgpsa == 0)
+			$("#nogps").show();
+		else{
+			$("#gps").show();
+		}
+		var izrisgrafov = ${graf}
+		if( izrisgrafov == 0)
+			$("#container0").show("fast");
+		//menjava puščic////////////////////////////////////////////
+		var a = ${smertemperature}
+		if( a >= 1)
+			$("#temperaturaslika").attr("src", "img/arrow_up.png");
+		if( a < 1 && a > -1)
+			$("#temperaturaslika").attr("src","img/arrow_right.png");
+		if( a < -1)
+			$("#temperaturaslika").attr("src","img/arrow_down.png");
+		
+		var b = ${smerpritiska}
+		if( b >= 50)
+			$("#pritiskslika").attr("src", "img/arrow_up.png");
+		if( b < 50 && b > -50)
+			$("#pritiskslika").attr("src","img/arrow_right.png");
+		if( b <= -50)
+			$("#pritiskslika").attr("src","img/arrow_down.png");
+		
+		var c = ${smervlage}
+		if( c >= 1)
+			$("#vlagaslika").attr("src", "img/arrow_up.png");
+		if( c < 1 && c > -1)
+			$("#vlagaslika").attr("src","img/arrow_right.png");
+		if( c <= -1)
+			$("#vlagaslika").attr("src","img/arrow_down.png");
+		////////////////////////////////////////////////////////
+		
+		$("#TabTrenutne").show();
+		$("#Trenutne").addClass("active");
+		
+		//console.log('def show');
+			
+		//switch buttons & make active
 		$('.gumb').click( function(e) {
 			var test = $(this).text();
 			 e.preventDefault();
@@ -183,11 +258,22 @@
 			$("div.desc").hide();
 			$("#Tab"+test).show();
 		});
+
+		//switch grapsh
+
 	}); 
+	
+	//$(function(){
+	//	var prikazgrafa = $("#selectmenu").val();
+	//	sss = $('#' + prikazgrafa);
+
+	//	$('.graph').hide();
+	//	sss.show("fast");
+
+	//});​
 	</script>
 	
     <!-- Le styles -->
-    <link href="http://getbootstrap.com/2.3.2/assets/css/bootstrap.css" rel="stylesheet">
     <style type="text/css">
       body {
         padding-top: 10px;
@@ -268,6 +354,10 @@
         border-right: 0;
         border-radius: 0 3px 3px 0;
       }
+	   #map_canvas {
+        width: 500px;
+        height: 360px;
+      }
     </style>
     <link href="http://getbootstrap.com/2.3.2/assets/css/bootstrap-responsive.css" rel="stylesheet">
 
@@ -283,8 +373,8 @@
                     <link rel="apple-touch-icon-precomposed" href="http://getbootstrap.com/2.3.2/assets/ico/apple-touch-icon-57-precomposed.png">
                                    <link rel="shortcut icon" href="http://getbootstrap.com/2.3.2/assets/ico/favicon.png">
   <style type="text/css"></style></head>
-
   <body>
+
 
     <div class="container">
 
@@ -311,15 +401,34 @@
       <div class="jumbotron" style='display: block; height: 350px'>
 		<!-- TRENUTNE MERITVE -->
 		<div id="TabTrenutne" class="desc">
-			<iframe width="425" height="350" frameborder="0" scrolling="yes" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=sl&amp;geocode=&amp;q=Ljubljana&amp;aq=&amp;sll=37.0625,-95.677068&amp;sspn=56.637293,114.169922&amp;ie=UTF8&amp;hq=&amp;hnear=Ljubljana,+Slovenija&amp;t=m&amp;z=12&amp;iwloc=A&amp;ll=46.056451,14.50807&amp;output=embed"></iframe><br /><small><a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=sl&amp;geocode=&amp;q=Ljubljana&amp;aq=&amp;sll=37.0625,-95.677068&amp;sspn=56.637293,114.169922&amp;ie=UTF8&amp;hq=&amp;hnear=Ljubljana,+Slovenija&amp;t=m&amp;z=12&amp;iwloc=A&amp;ll=${gps_x},${gps_y}" style="color:#0000FF;text-align:left">Večji zemljevid</a></small>
+			<div id="nogps"style="min-width: 80%; height: 400px; margin: 0 auto; display: none;"><h3>GPS meritve trenutno niso na voljo.</h3></div>
+			<div id="gps" align="center" style="display: none;">
+				<!--<iframe width="425" height="350" frameborder="0" scrolling="yes" marginheight="0" marginwidth="0" src="https://maps.google.com/?ie=UTF8&amp;t=m&amp;ll=,14.511909&amp;spn=${gps_x},${gps_y}&amp;z=11&amp;output=embed"></iframe><br /><small><a href="https://maps.google.com/?ie=UTF8&amp;t=m&amp;ll=46.053458,14.511909&amp;spn=0.083392,0.145912&amp;z=12&amp;source=embed" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+				--><div id="map_canvas"></div>
+				<div>
+					<table border="0" style="font-size:120%;">
+					<tr>
+					<td style="padding:15px;">Zemljepisna širina: ${gps_x}</td>
+					<td style="padding:15px;">Zemljepisna dolžina: ${gps_y}</td>
+					<td style="padding:15px;">Nadmorska višina: ${sensors["height"]}</td>
+					</tr>
+					</table>
+				</div>
 			</div>
+		</div>
 			
 		<!-- ZGODOVINA MERITEV  ( GRAF )-->	
 		<div id="TabZgodovina" class="desc" style="width: 100%; height: 100%;">
-			
-			<div id="container" style="min-width: 80%; height: 400px; margin: 0 auto; display: none;"></div>
-			<div id="container2" style="min-width: 80%; height: 400px; margin: 0 auto;"></div>
-		
+			<label class="control-label" style="display:inline-block;">Izbira grafa:</label>
+				<select id="selectmenu" class="input-block-level" style="width: 270px; display:inline-block; margin: 0 auto;">
+					<option value="container1">Graf povprečne temperature</option>
+					<option value="container3">Graf povprečnega zračnega tlaka</option>
+					<option value="container2">Graf povprečne vlage</option>
+				</select>
+			<div id="container0" style="min-width: 80%; height: 400px; margin: 0 auto; display: none;"><h3>V ${displaygps}podatkovni bazi ni dovolj meritev za izris grafa!</h3></div>
+			<div id="container1" class="graph" style="min-width: 80%; height: 400px; margin: 0 auto; display: none;"></div>
+			<div id="container2" class="graph" style="min-width: 80%; height: 400px; margin: 0 auto; display: none;"></div>
+			<div id="container3" class="graph" style="min-width: 80%; height: 400px; margin: 0 auto; display: none;"></div>
 		</div>
 			
 			
@@ -436,7 +545,5 @@
     <script src="./Template · Bootstrap_files/bootstrap-collapse.js"></script>
     <script src="./Template · Bootstrap_files/bootstrap-carousel.js"></script>
     <script src="./Template · Bootstrap_files/bootstrap-typeahead.js"></script>
-
-  
 
 </body></html>

@@ -7,6 +7,8 @@ from mako.template import Template
 from alchemy_interface import *
 from cherrypy.lib.static import serve_file
 import math
+import itertools
+import time
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 session = Session()
@@ -25,18 +27,41 @@ mytemplate = Template(filename = 'index.htm')
 class Root(object):
     @cherrypy.expose
     def index(self):
+        def sec_to_time(sec):
+
+            days = sec / 86400
+            sec -= 86400*days
+
+            hrs = sec / 3600
+            sec -= 3600*hrs
+
+            mins = sec / 60
+            sec -= 60*mins
+            m = "{0}:{1}".format(hrs,mins)
+            return hrs
+
 		#dict za spremenljivke, ki gredo na stran
         l = {"sensors":{}}
-        
+        now = datetime.datetime.now()
+        l["date"] = now.strftime('%d/%m/%Y')
+        newnow = now + timedelta(hours=2)
+        l["time"] = newnow.strftime('%H:%M')
+        l["grafyear"] = now.year
+        l["grafmonth"] = now.month - 2
+        l["grafday"] = now.day
+
         #izpis tabele zadnjih vnosov
         sensor_types = session.query(distinct(Measure.sensor)).all()
         for i in sensor_types:
-            qry = session.query(Measure).filter(Measure.sensor == i[0]).order_by(Measure.time.desc()).first()
+            qry = session.query(Measure).filter(Measure.sensor == i[0]).order_by(Measure.id.desc()).first()
             l["sensors"][qry.sensor] = qry.value
             l["gps_x"] = qry.gps_x
             l["gps_y"] = qry.gps_y
-            l["date"] = qry.date
-            l["time"] = qry.time
+            l["date2"] = qry.date
+            l["time2"] = qry.time
+            l["displaygps"] = 1
+            if int(qry.gps_x) == 99:
+                l["displaygps"] = 0
             #qry = session.query(Measure).filter(Measure.sensor == 'temperature').order_by(Measure.time.desc()).limit(10)
             #print l
         
@@ -57,30 +82,81 @@ class Root(object):
         grafpritiska = []
         grafvlage = []
         grafcasa = []
-        if l["id"] < 30:
-            l["graf"] = 0
+        strcasa = []
         
-        k = 30
+        tmpgraftemperature = []
+        tmpgrafpritiska = []
+        tmpgrafvlage = []
+        tmpgrafcasa = []
+        tmpcasvsekundah = []
+        if l["id"] < 12*24:
+            l["graf"] = 0
+            l["graftemperature"] = graftemperature
+            l["grafpritiska"] = grafpritiska
+            l["grafvlage"] = grafvlage
+            l["grafcasa"] = grafcasa
+        else:
+            l["graf"] = 1
+            k = 12
+        
         
         for sens2 in sensor_types:
-            qry3 = session.query(Measure).filter(Measure.sensor == sens2[0]).order_by(Measure.time.desc()).limit(k)
+            qry3 = session.query(Measure).filter(Measure.sensor == sens2[0]).order_by(Measure.id.desc()).limit(12*24)
             for k2 in qry3:
-                
                 if sens2[0] == 'temperature':
-                    grafcasa.append(str(k2.time))
+                    x = time.strptime(str(k2.time).split('.')[0],'%H:%M:%S')
+                    total_sec = datetime.timedelta(hours=x.tm_hour,minutes=x.tm_min,seconds=x.tm_sec).total_seconds()
+                    tmpgrafcasa.append(int(total_sec))
                     #print j.value
-                    graftemperature.append(float(k2.value))
-
-                if sens2[0] == 'pressure':
-                    grafpritiska.append(float(k2.value))
-
-                if sens2[0] == 'moisture':
-                    grafvlage.append(float(k2.value))
-        l["graftemperature"] = graftemperature
-        l["grafpritiska"] = grafpritiska
-        l["grafvlage"] = grafvlage
-        l["grafcasa"] = grafcasa
+                    tmpgraftemperature.append(int(k2.value))
         
+                if sens2[0] == 'pressure':
+                    tmpgrafpritiska.append(int(k2.value))
+        
+                if sens2[0] == 'moisture':
+                    tmpgrafvlage.append(int(k2.value))
+        temp_by_12 = itertools.imap(None, *[iter(tmpgraftemperature)]*12)
+        pres_by_12 = itertools.imap(None, *[iter(tmpgrafpritiska)]*12)
+        moist_by_12 = itertools.imap(None, *[iter(tmpgrafvlage)]*12)
+        time_by_12 = itertools.imap(None, *[iter(tmpgrafcasa)]*12)
+        
+        for x in range(24):
+            k = temp_by_12.next()
+            graftemperature.append(sum(k)/len(k))
+        
+        for x in range(24):
+            k = pres_by_12.next()
+            grafpritiska.append(sum(k)/len(k))
+        
+        for x in range(24):
+            k = moist_by_12.next()
+            grafvlage.append(sum(k)/len(k))
+        
+        for x in range(24):
+            k = time_by_12.next()
+            grafcasa.append(sum(k)/len(k))
+        
+        graftemperature = graftemperature[::-1]
+        grafpritiska = grafpritiska[::-1]
+        grafvlage = grafvlage[::-1]
+        grafcasa = grafcasa[::-1]
+        
+        
+        for i in range(24):
+            strtime = sec_to_time(grafcasa[i])
+            strcasa.append(strtime)
+        
+        l["graftemperature"] = list(graftemperature)
+        l["grafpritiska"] = list(grafpritiska)
+        l["grafvlage"] = list(grafvlage)
+        l["grafcasa"] = strcasa
+
+
+
+
+
+
+#################################################### 
         #branje zadnjih 10-ih za izris puscic 
         i = 10
         if l["id"] < i:
@@ -101,7 +177,7 @@ class Root(object):
 
 
         for sens in sensor_types:
-            qry2 = session.query(Measure).filter(Measure.sensor == sens[0]).order_by(Measure.time.desc()).limit(i)
+            qry2 = session.query(Measure).filter(Measure.sensor == sens[0]).order_by(Measure.id.desc()).limit(i)
 
             #seznam za  graf
             for j in qry2:
