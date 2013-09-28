@@ -38,7 +38,7 @@ class Root(object):
             mins = sec / 60
             sec -= 60*mins
             m = "{0}:{1}".format(hrs,mins)
-            return hrs
+            return m
 
 		#dict za spremenljivke, ki gredo na stran
         l = {"sensors":{}}
@@ -73,8 +73,10 @@ class Root(object):
 
         #all measures
         all = session.query(Measure).order_by(Measure.id.desc()).first()
-        l["id"] = all.id / len(sensor_types)
-
+        l["id_by_sensor"] = all.id / len(sensor_types)
+        l["id"] = all.id
+        first_time = session.query(Measure).order_by(Measure.id.asc()).first()
+        l["first_time"] = datetime.datetime.combine(first_time.date,first_time.time)
         #
         ###branje podatkov za izris grafa
         #
@@ -157,8 +159,8 @@ class Root(object):
 
 
 #################################################### 
-        #branje zadnjih 10-ih za izris puscic 
-        i = 10
+        #branje zadnjih 5-ih za izris puscic 
+        i = 5
         if l["id"] < i:
             i = l["id"]
 

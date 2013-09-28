@@ -26,6 +26,25 @@
 	
     <script type="text/javascript">
 
+	
+	function menuChange() {
+		if (document.getElementById("menu_change").value == "1"){
+			document.getElementById('container3').style.display = "none";
+			document.getElementById('container2').style.display = "none";
+			document.getElementById('container1').style.display = "block";
+		}     
+		if (document.getElementById("menu_change").value == "2"){
+			document.getElementById('container1').style.display = "none";
+			document.getElementById('container3').style.display = "none";
+			document.getElementById('container2').style.display = "block";
+		}
+		if (document.getElementById("menu_change").value == "3"){
+			document.getElementById('container1').style.display = "none";
+			document.getElementById('container2').style.display = "none";
+			document.getElementById('container3').style.display = "block";
+		}
+	}
+	//initializacija google zemljevida
 	function initialize() {
         var map_canvas = document.getElementById('map_canvas');
         var map_options = {
@@ -213,6 +232,8 @@
 		var izrisgrafov = ${graf}
 		if( izrisgrafov == 0)
 			$("#container0").show("fast");
+		if( izrisgrafov == 1)
+			$("#container1").show();
 		//menjava puščic////////////////////////////////////////////
 		var a = ${smertemperature}
 		if( a >= 1)
@@ -420,15 +441,15 @@
 		<!-- ZGODOVINA MERITEV  ( GRAF )-->	
 		<div id="TabZgodovina" class="desc" style="width: 100%; height: 100%;">
 			<label class="control-label" style="display:inline-block;">Izbira grafa:</label>
-				<select id="selectmenu" class="input-block-level" style="width: 270px; display:inline-block; margin: 0 auto;">
-					<option value="container1">Graf povprečne temperature</option>
-					<option value="container3">Graf povprečnega zračnega tlaka</option>
-					<option value="container2">Graf povprečne vlage</option>
+				<select id="menu_change" onchange="menuChange()" class="input-block-level" style="width: 270px; display:inline-block; margin: 0 auto;">
+					<option value="1">Graf povprečne temperature</option>
+					<option value="3">Graf povprečnega zračnega tlaka</option>
+					<option value="2">Graf povprečne vlage</option>
 				</select>
-			<div id="container0" style="min-width: 80%; height: 400px; margin: 0 auto; display: none;"><h3>V ${displaygps}podatkovni bazi ni dovolj meritev za izris grafa!</h3></div>
-			<div id="container1" class="graph" style="min-width: 80%; height: 400px; margin: 0 auto; display: none;"></div>
-			<div id="container2" class="graph" style="min-width: 80%; height: 400px; margin: 0 auto; display: none;"></div>
-			<div id="container3" class="graph" style="min-width: 80%; height: 400px; margin: 0 auto; display: none;"></div>
+			<div id="container0" style="min-width: 60%; height: 380px; margin: 0 auto; display: none;"><h3>V ${displaygps}podatkovni bazi ni dovolj meritev za izris grafa!</h3></div>
+			<div id="container1" class="graph" style="min-width: 60%; height: 380px; margin: 0 auto; display: none;"></div>
+			<div id="container2" class="graph" style="min-width: 60%; height: 380px; margin: 0 auto; display: none;"></div>
+			<div id="container3" class="graph" style="min-width: 60%; height: 380px; margin: 0 auto; display: none;"></div>
 		</div>
 			
 			
@@ -466,10 +487,16 @@
 				<td colspan="4"></td>
 			</tr>
 			<tr>
-				<td>Število meritev: </td>
-				<td>${id}</td>
+				<td>Število meritev posameznega senzorja: </td>
+				<td>${id_by_sensor}</td>
 				<td>Uptime: </td>
 				<td>${uptime}</td>
+			</tr>
+			<tr>
+				<td>Število vseh meritev: </td>
+				<td>${id}</td>
+				<td>Prva meritev: </td>
+				<td>${first_time}</td>
 			</tr>
 			
         </tbody>  
