@@ -15,18 +15,14 @@ session = Session()
 
 
 mytemplate = Template(filename = 'index.htm')
-#module_directory = '/home/pi/CherryPy-3.2.2/cherrypy/test')
 #directories = "/home/pi/m/cherrypy/docs/index.html"
 #collection_size = 500
 #lookup = TemplateLookup(directories)
 
-#l = {'valuem': Decimal('25.1'), 'valuep': Decimal('10.5'), 'coordinate_y': Decimal('14.50807'), 'coordinate_x': Decimal('46.056451'), 'valuet': Decimal('32.7'), 'time': datetime.time(17, 38, 43, 536627), 'date': datetime.date(2013, 2, 27), 'height': Decimal('646.4'), 'sensor': u'height'}
-#2013-03-06 11:55:20,446 INFO sqlalchemy.engine.base.Engine (u'height', 1, 0) {'sensors': {u'pressure': Decimal('-6.3'), u'temperature': Decimal('4.5'), u'moisture': Decimal('19.8'), u'height': Decimal('646.4')}}
-
-
 class Root(object):
     @cherrypy.expose
     def index(self):
+        #pretvorba iz sekund v ure
         def sec_to_time(sec):
 
             days = sec / 86400
@@ -42,6 +38,8 @@ class Root(object):
 
 		#dict za spremenljivke, ki gredo na stran
         l = {"sensors":{}}
+
+        #modifikacija datuma za prikaz grafa vlage
         now = datetime.datetime.now()
         l["date"] = now.strftime('%d/%m/%Y')
         newnow = now + timedelta(hours=2)
@@ -71,15 +69,17 @@ class Root(object):
             uptime_string = str(timedelta(seconds = uptime_seconds))
         l["uptime"] = uptime_string
 
-        #all measures
+        #vsi zapisi in stevilo vnosov posameznega senzorja
         all = session.query(Measure).order_by(Measure.id.desc()).first()
         l["id_by_sensor"] = all.id / len(sensor_types)
         l["id"] = all.id
+        
+        #izpis casa prve meritve
         first_time = session.query(Measure).order_by(Measure.id.asc()).first()
         l["first_time"] = datetime.datetime.combine(first_time.date,first_time.time)
-        #
+
         ###branje podatkov za izris grafa
-        #
+
         graftemperature = []
         grafpritiska = []
         grafvlage = []
@@ -91,7 +91,7 @@ class Root(object):
         tmpgrafvlage = []
         tmpgrafcasa = []
         tmpcasvsekundah = []
-        if l["id"] < 12*24:
+        if l["id_by_sensor"] < 12*24:
             l["graf"] = 0
             l["graftemperature"] = graftemperature
             l["grafpritiska"] = grafpritiska
@@ -154,19 +154,16 @@ class Root(object):
         l["grafcasa"] = strcasa
 
 
-
-
-
-
 #################################################### 
         #branje zadnjih 5-ih za izris puscic 
-        i = 5
-        if l["id"] < i:
-            i = l["id"]
 
-        #
+        i = 5
+        if l["id_by_sensor"] < i:
+            i = l["id_by_sensor"]
+
+        
         ####tabele zadnjih vnosov
-        #
+
         povtemperatura = []
         povpritisk = []
         povvlaga = []
@@ -233,16 +230,6 @@ class Root(object):
             l[k[0]+"Max"] = math.ceil(maxi[0].maximum)
             l[k[0]+"Min"] = math.ceil(mini[0].minimum)
 
-#            if k[0] == 'pressure':
-#           	l["pAverage"] = math.ceil(avg[0].average)/100
-#            	l["pMax"] = math.ceil(max[0].max)/100
-#            	l["pMin"] = math.ceil(min[0].min)/100
-#
-#            if k[0] == 'moisture':
-#            	l["mAverage"] = math.ceil(avg[0].average)/100
-#            	l["mMax"] = math.ceil(max[0].max)/100
-#            	l["mMin"] = math.ceil(min[0].min)/100
-#
             if k[0] == 'height':
             	l["hAverage"] = aver[0].average
             	l["hMax"] = maxi[0].maximum
