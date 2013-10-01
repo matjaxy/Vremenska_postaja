@@ -5,6 +5,7 @@ import subprocess
 import serial
 import string
 import math
+import subprocess as subp
 
 #data format
 now = datetime.datetime.now()
@@ -65,17 +66,11 @@ else:
     #print y
 
     tmp = gps_list[1]
-#time strip
-#tmp2 = int(tmp[:2])
-#tmp3 = int(tmp[2:4])
-#tmp4 = int(tmp[4:])
-#TEMPORARY = random.randint (0, 999999)
 
 cajt = datetime.time((now.hour+2)%24, now.minute, now.second, now.microsecond)
-#x = round (random.randrange(0, 1000) + random.random() , 3)
-#y = round (random.randrange(0, 1000) + random. random() , 3)
 
-##parsanje cifer iz izhoda driverja za zaznavanje senzorjev
+
+#TEMPERATURA IN VLAGA
 args = ['sudo', '/home/pi/Downloads/Adafruit-Raspberry-Pi-Python-Code/Adafruit_DHT_Driver/Adafruit_DHT', '11', '4']
 
 proc = subprocess.Popen(args, stdout=subprocess.PIPE)
@@ -88,6 +83,14 @@ for splitter in output.split(" "):
     counter += 1
 #print tmpmeasures[0],tmpmeasures[1]
 
+#TEMPERATURA IN PRITISK
+
+proc = subp.Popen(["python", "i2c.py"], stdout=subp.PIPE, stdin=subp.PIPE)
+out = proc.stdout.readline()
+out2 = out.split()
+pritisk = int(round(float(out2[0])))
+temperatura = int(round(float(out2[1])))
+
 
 #for every sensor add a new line
 for i in sensors:
@@ -97,9 +100,11 @@ for i in sensors:
     if i == "height":
         value = h
     if i == "temperature":
-        value = tmpmeasures[0]
+        value = temperatura
     if i == "moisture":
         value = tmpmeasures[1]
+    if i == "pressure":
+        value = pritisk
 
 
     new_entry = Measure(date, cajt, x, y, i, value)
